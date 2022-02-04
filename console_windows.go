@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/erikgeiser/coninput"
 	"golang.org/x/sys/windows"
 )
 
@@ -94,6 +95,7 @@ func (m *master) SetRaw() error {
 }
 
 func (m *master) Reset() error {
+	fmt.Println("------ RESET -------")
 	for _, s := range []struct {
 		fd   windows.Handle
 		mode uint32
@@ -105,6 +107,7 @@ func (m *master) Reset() error {
 		if err := windows.SetConsoleMode(s.fd, s.mode); err != nil {
 			return fmt.Errorf("unable to restore console mode: %w", err)
 		}
+		fmt.Printf("=> Restore %d to %d: %s\n", s.fd, s.mode, coninput.DescribeInputMode(s.mode))
 	}
 
 	return nil
@@ -180,12 +183,14 @@ func makeInputRaw(fd windows.Handle, mode uint32) error {
 	mode &^= windows.ENABLE_LINE_INPUT
 	mode &^= windows.ENABLE_MOUSE_INPUT
 	mode &^= windows.ENABLE_WINDOW_INPUT
-	mode &^= windows.ENABLE_PROCESSED_INPUT
+	//mode &^= windows.ENABLE_PROCESSED_INPUT
 
 	// Enable these modes
 	mode |= windows.ENABLE_EXTENDED_FLAGS
 	mode |= windows.ENABLE_INSERT_MODE
 	mode |= windows.ENABLE_QUICK_EDIT_MODE
+	mode |= windows.ENABLE_PROCESSED_INPUT
+	//mode |= windows.ENABLE_VIRTUAL_TERMINAL_INPUT
 
 	if vtInputSupported {
 		mode |= windows.ENABLE_VIRTUAL_TERMINAL_INPUT
@@ -207,6 +212,7 @@ func checkConsole(f File) error {
 }
 
 func newMaster(f File) (Console, error) {
+	fmt.Println("-------------")
 	if f != os.Stdin && f != os.Stdout && f != os.Stderr {
 		return nil, errors.New("creating a console from a file is not supported on windows")
 	}
