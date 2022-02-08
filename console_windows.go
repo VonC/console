@@ -95,7 +95,7 @@ func (m *master) SetRaw() error {
 }
 
 func (m *master) Reset() error {
-	fmt.Println("------ RESET -------")
+	fmt.Printf("------ RESET -------\n\n")
 	for _, s := range []struct {
 		fd   windows.Handle
 		mode uint32
@@ -107,7 +107,7 @@ func (m *master) Reset() error {
 		if err := windows.SetConsoleMode(s.fd, s.mode); err != nil {
 			return fmt.Errorf("unable to restore console mode: %w", err)
 		}
-		fmt.Printf("=> Restore %d to %d: %s\n", s.fd, s.mode, coninput.DescribeInputMode(s.mode))
+		fmt.Printf("\n=> Restore %d to %d: %s\n", s.fd, s.mode, coninput.DescribeInputMode(s.mode))
 	}
 
 	return nil
